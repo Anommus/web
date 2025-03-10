@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy Crush Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8c291;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 5px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .candy {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid" id="grid"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const grid = document.getElementById("grid");
+            const colors = ["red", "blue", "green", "yellow", "purple", "orange"];
+            let candies = [];
+            
+            function createBoard() {
+                for (let i = 0; i < 64; i++) {
+                    const candy = document.createElement("div");
+                    candy.classList.add("candy");
+                    let randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    candy.style.backgroundColor = randomColor;
+                    candy.setAttribute("draggable", true);
+                    candy.setAttribute("id", i);
+                    candy.addEventListener("dragstart", dragStart);
+                    candy.addEventListener("dragover", dragOver);
+                    candy.addEventListener("drop", dragDrop);
+                    candy.addEventListener("dragend", dragEnd);
+                    grid.appendChild(candy);
+                    candies.push(candy);
+                }
+            }
+            
+            let draggedCandy = null;
+            let replacedCandy = null;
+    
+            function dragStart() {
+                draggedCandy = this;
+            }
+    
+            function dragOver(e) {
+                e.preventDefault();
+            }
+    
+            function dragDrop() {
+                replacedCandy = this;
+            }
+    
+            function dragEnd() {
+                if (replacedCandy) {
+                    let draggedColor = draggedCandy.style.backgroundColor;
+                    draggedCandy.style.backgroundColor = replacedCandy.style.backgroundColor;
+                    replacedCandy.style.backgroundColor = draggedColor;
+                    checkMatches();
+                }
+            }
+            
+            function checkMatches() {
+                for (let i = 0; i < 64; i++) {
+                    let rowMatch = [i, i + 1, i + 2];
+                    let colMatch = [i, i + 8, i + 16];
+                    let color = candies[i].style.backgroundColor;
+                    
+                    if (rowMatch.every(index => candies[index] && candies[index].style.backgroundColor === color)) {
+                        rowMatch.forEach(index => candies[index].style.backgroundColor = "white");
+                    }
+                    if (colMatch.every(index => candies[index] && candies[index].style.backgroundColor === color)) {
+                        colMatch.forEach(index => candies[index].style.backgroundColor = "white");
+                    }
+                }
+                setTimeout(fillBlanks, 200);
+            }
+    
+            function fillBlanks() {
+                for (let i = 0; i < 64; i++) {
+                    if (candies[i].style.backgroundColor === "white") {
+                        candies[i].style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    }
+                }
+            }
+    
+            createBoard();
+        });
+    </script>
+</body>
+</html>
